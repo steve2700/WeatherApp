@@ -1,9 +1,6 @@
 # WeatherApp
-<<<<<<< HEAD
-building a weather app using Apis of weather da
-=======
-building a weather app using Apis of weather data.
-Weather App
+
+b
 The Weather App is a web-based application that provides real-time weather information for any city around the world. With this app, you can easily retrieve the current weather conditions, temperature, and a 5-day forecast for the desired location.
 
 # Features
