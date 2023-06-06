@@ -1,253 +1,136 @@
-const api = {
-  key: "5ec5845a9b7c8e9451636b9e096d36ab",
-  
-  base: "https://api.openweathermap.org/data/2.5/"
-};
+const searchBox = document.querySelector('.search-box');
+searchBox.addEventListener('keypress', setQuery);
 
-const searchbox = document.querySelector('.search-box');
-searchbox.addEventListener('keypress', setQuery);
+const apiKey = '5ec5845a9b7c8e9451636b9e096d36ab'; 
 
 function setQuery(evt) {
-  if (evt.keyCode == 13) {
-    getResults(searchbox.value);
+  if (evt.keyCode === 13) {
+    getResults(searchBox.value);
   }
 }
 
 function getResults(query) {
-  fetch(`${api.base}weather?q=${query}&units=metric&APPID=${api.key}`)
-    .then(weather => weather.json())
-    .then(displayResults)
-    .catch(showError);
-
-  fetch(`${api.base}forecast?q=${query}&units=metric&APPID=${api.key}`)
-    .then(forecast => forecast.json())
-    .then(displayForecast)
-    .catch(showError);
+  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${apiKey}&units=metric`)
+    .then(weather => {
+      return weather.json();
+    }).then(displayResults)
+    .catch(err => {
+      console.log(err);
+      alert('Error retrieving weather data. Please try again later.');
+    });
 }
 
 function displayResults(weather) {
-  let city = document.querySelector('.location .city');
+  const city = document.querySelector('.city');
   city.textContent = `${weather.name}, ${weather.sys.country}`;
 
-  let now = new Date();
-  let date = document.querySelector('.location .date');
+  const now = new Date();
+  const date = document.querySelector('.date');
   date.textContent = dateBuilder(now);
 
-  let temp = document.querySelector('.current .temp');
-  temp.innerHTML = `${Math.round(weather.main.temp)}<span>°C</span>`;
+  const temp = document.querySelector('.temp');
+  temp.innerHTML = `${Math.round(weather.main.temp)}<span>°c</span>`;
 
-  let weatherIcon = document.querySelector('.current .weather i');
-  weatherIcon.className = `wi ${getWeatherIcon(weather.weather[0].id)}`;
+  const weatherIcon = document.querySelector('.wi');
+  weatherIcon.className = `wi wi-owm-${weather.weather[0].id}`;
 
-  let weatherDescription = document.querySelector('.current .weather');
-  weatherDescription.textContent = weather.weather[0].description;
+  const weatherDescription = document.querySelector('.weather');
+  weatherDescription.textContent = weather.weather[0].main;
 
-  let hilow = document.querySelector('.hi-low');
-  hilow.textContent = `${Math.round(weather.main.temp_min)}°C / ${Math.round(weather.main.temp_max)}°C`;
-}
+  const hiLow = document.querySelector('.hi-low');
+  hiLow.textContent = `${Math.round(weather.main.temp_min)}°c / ${Math.round(weather.main.temp_max)}°c`;
 
-function displayForecast(forecast) {
-  let forecastDiv = document.querySelector('.forecast');
-  forecastDiv.innerHTML = '';
-
-  for (let i = 0; i < forecast.list.length; i += 8) {
-    let forecastData = forecast.list[i];
-
-    let forecastItem = document.createElement('div');
-    forecastItem.classList.add('forecast-item');
-
-    let forecastDate = document.createElement('div');
-    forecastDate.classList.add('forecast-date');
-    forecastDate.textContent = formatDate(forecastData.dt_txt);
-    forecastItem.appendChild(forecastDate);
-
-    let forecastIcon = document.createElement('i');
-    forecastIcon.className = `wi ${getWeatherIcon(forecastData.weather[0].id)}`;
-    forecastItem.appendChild(forecastIcon);
-
-    let forecastTemp = document.createElement('div');
-    forecastTemp.classList.add('forecast-temp');
-    forecastTemp.innerHTML = `${Math.round(forecastData.main.temp)}<span>°C</span>`;
-    forecastItem.appendChild(forecastTemp);
-
-    forecastDiv.appendChild(forecastItem);
-  }
-}
-
-function formatDate(dateString) {
-  let date = new Date(dateString);
-  let options = { weekday: 'short', month: 'short', day: 'numeric' };
-  return date.toLocaleDateString(undefined, options);
-}
-
-function getWeatherIcon(conditionCode) {
-  switch (true) {
-    case conditionCode >= 200 && conditionCode <= 232:
-      return 'wi-thunderstorm';
-    case conditionCode >= 300 && conditionCode <= 321:
-      return 'wi-showers';
-    case conditionCode >= 500 && conditionCode <= 531:
-      return 'wi-rain';
-    case conditionCode >= 600 && conditionCode <= 622:
-      return 'wi-snow';
-    case conditionCode >= 701 && conditionCode <= 781:
-      return 'wi-fog';
-    case conditionCode === 800:
-      return 'wi-day-sunny';
-    case conditionCode >= 801 && conditionCode <= 804:
-      return 'wi-cloudy';
-    default:
-      return 'wi-refresh';
-  }
+  getUVIndex(weather.coord.lat, weather.coord.lon);
+  getPollenCount(weather.coord.lat, weather.coord.lon);
+  getAirQualityIndex(weather.coord.lat, weather.coord.lon);
+  getTravelWeather(weather.name);
+  getForecast(weather.coord.lat, weather.coord.lon);
 }
 
 function dateBuilder(d) {
-  let months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-        "September",
-    "October",
-    "November",
-    "December"
-  ];
-  let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  let day = days[d.getDay()];
-  let date = d.getDate();
-  let month = months[d.getMonth()];
-  let year = d.getFullYear();
+  const day = days[d.getDay()];
+  const date = d.getDate();
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
 
   return `${day}, ${date} ${month} ${year}`;
 }
-function getQuery(evt) {
-  if (evt.keyCode == 13) {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { latitude, longitude } = position.coords;
-        getResultsByCoordinates(latitude, longitude);
-      }, () => {
-        getResults(searchbox.value);
-      });
-    } else {
-      getResults(searchbox.value);
+
+function getUVIndex(latitude, longitude) {
+  const apiKey = 'openuv-7rumrlikq72ku-io';
+  const url = `https://api.openuv.io/api/v1/uv?lat=${latitude}&lng=${longitude}`;
+
+  fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      'x-access-token': apiKey
     }
-  }
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Handle the UV index data here
+    console.log('UV Index Data:', data);
+  })
+  .catch(error => {
+    // Handle any errors
+    console.error('Error:', error);
+  });
 }
-function getResultsByCoordinates(latitude, longitude) {
-  fetch(`${api.base}weather?lat=${latitude}&lon=${longitude}&units=metric&APPID=${api.key}`)
-    .then(weather => weather.json())
-    .then(displayResults)
-    .catch(showError);
 
-  fetch(`${api.base}forecast?lat=${latitude}&lon=${longitude}&units=metric&APPID=${api.key}`)
-    .then(forecast => forecast.json())
-    .then(displayForecast)
-    .catch(showError);
+function getPollenCount(lat, lon) {
+  // Implement your code to get the pollen count for the given latitude and longitude
+  // You can use an API or any other method to get the pollen count data
 }
-function showError(error) {
-  let errorMessage;
-  if (error instanceof TypeError) {
-    errorMessage = "Network error occurred. Please check your internet connection.";
-  } else {
-    errorMessage = "An error occurred. Please try again later.";
-  }
-  console.log(error);
-  // Display the error message in the UI as desired
+
+function getAirQualityIndex(lat, lon) {
+  // Implement your code to get the air quality index for the given latitude and longitude
+  // You can use an API or any other method to get the air quality index data
 }
-// Hourly forecast
-fetch(`${api.base}forecast?lat=${latitude}&lon=${longitude}&units=metric&APPID=${api.key}`)
-  .then(forecast => forecast.json())
-  .then(displayForecast)
-  .catch(showError);
 
-// UV index
-const getUVIndex = (weather) => {
-  switch (weather.weather[0].id) {
-    case 200:
-      return "Very high";
-    case 201:
-      return "High";
-    case 202:
-      return "Moderate";
-    case 210:
-      return "Low";
-    default:
-      return "No UV index";
-  }
-};
+function getTravelWeather(city) {
+  // Implement your code to get the travel weather for the given city
+  // You can use an API or any other method to get the travel weather data
+}
 
-// Pollen count
-const getPollenCount = (weather) => {
-  return weather.weather[0].description;
-};
+function getForecast(lat, lon) {
+  fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=current,minutely,hourly&appid=${apiKey}&units=metric`)
+    .then(forecast => {
+      return forecast.json();
+    }).then(displayForecast)
+    .catch(err => {
+      console.log(err);
+      alert('Error retrieving forecast data. Please try again later.');
+    });
+}
 
-// Air quality index
-const getAirQualityIndex = (weather) => {
-  return weather.weather[0].description;
-};
-
-// Travel weather
-const getTravelWeather = (weather) => {
-  return weather.weather[0].description;
-};
-
-// Display the hourly forecast
 function displayForecast(forecast) {
-  let forecastDiv = document.querySelector('.forecast');
-  forecastDiv.innerHTML = '';
+  const forecastContainer = document.querySelector('.forecast');
+  forecastContainer.innerHTML = '';
 
-  for (let i = 0; i < forecast.list.length; i += 8) {
-    let forecastData = forecast.list[i];
+  for (let i = 1; i < 6; i++) {
+    const day = forecast.daily[i];
+    const forecastElement = document.createElement('div');
+    forecastElement.classList.add('day');
 
-    let forecastItem = document.createElement('div');
-    forecastItem.classList.add('forecast-item');
+    const dayName = document.createElement('div');
+    dayName.classList.add('day-name');
+    dayName.textContent = getDayName(day.dt);
 
-    let forecastDate = document.createElement('div');
-    forecastDate.classList.add('forecast-date');
-    forecastDate.textContent = formatDate(forecastData.dt_txt);
-    forecastItem.appendChild(forecastDate);
+    const dayTemp = document.createElement('div');
+    dayTemp.classList.add('day-temp');
+    dayTemp.innerHTML = `${Math.round(day.temp.min)}°c / ${Math.round(day.temp.max)}°c`;
 
-    let forecastIcon = document.createElement('i');
-    forecastIcon.className = `wi ${getWeatherIcon(forecastData.weather[0].id)}`;
-    forecastItem.appendChild(forecastIcon);
-
-    let forecastTemp = document.createElement('div');
-    forecastTemp.classList.add('forecast-temp');
-    forecastTemp.innerHTML = `${Math.round(forecastData.main.temp)}<span>°C</span>`;
-    forecastItem.appendChild(forecastTemp);
-
-    forecastDiv.appendChild(forecastItem);
+    forecastElement.appendChild(dayName);
+    forecastElement.appendChild(dayTemp);
+    forecastContainer.appendChild(forecastElement);
   }
 }
 
-// Display the UV index
-function displayUVIndex(weather) {
-  let uvIndex = document.querySelector('.uv-index');
-  uvIndex.textContent = getUVIndex(weather);
+function getDayName(timestamp) {
+  const date = new Date(timestamp * 1000);
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return days[date.getDay()];
 }
-
-// Display the pollen count
-function displayPollenCount(weather) {
-  let pollenCount = document.querySelector('.pollen-count');
-  pollenCount.textContent = getPollenCount(weather);
-}
-
-// Display the air quality index
-function displayAirQualityIndex(weather) {
-  let airQualityIndex = document.querySelector('.air-quality-index');
-  airQualityIndex.textContent = getAirQualityIndex(weather);
-}
-
-// Display the travel weather
-function displayTravelWeather(weather) {
-  let travelWeather = document.querySelector('.travel-weather');
-  travelWeather.textContent = getTravelWeather(weather);
-}
-
-
