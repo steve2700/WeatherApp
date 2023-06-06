@@ -125,5 +125,40 @@ function dateBuilder(d) {
 
   return `${day}, ${date} ${month} ${year}`;
 }
+function getQuery(evt) {
+  if (evt.keyCode == 13) {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const { latitude, longitude } = position.coords;
+        getResultsByCoordinates(latitude, longitude);
+      }, () => {
+        getResults(searchbox.value);
+      });
+    } else {
+      getResults(searchbox.value);
+    }
+  }
+}
+function getResultsByCoordinates(latitude, longitude) {
+  fetch(`${api.base}weather?lat=${latitude}&lon=${longitude}&units=metric&APPID=${api.key}`)
+    .then(weather => weather.json())
+    .then(displayResults)
+    .catch(showError);
+
+  fetch(`${api.base}forecast?lat=${latitude}&lon=${longitude}&units=metric&APPID=${api.key}`)
+    .then(forecast => forecast.json())
+    .then(displayForecast)
+    .catch(showError);
+}
+function showError(error) {
+  let errorMessage;
+  if (error instanceof TypeError) {
+    errorMessage = "Network error occurred. Please check your internet connection.";
+  } else {
+    errorMessage = "An error occurred. Please try again later.";
+  }
+  console.log(error);
+  // Display the error message in the UI as desired
+}
 
 
