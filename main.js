@@ -117,7 +117,7 @@ function displayForecast(forecast) {
   const forecastContainer = document.querySelector('.forecast');
   forecastContainer.innerHTML = '';
 
-  for (let i = 1; i < 6; i++) {
+  for (let i = 0; i < 5; i++) {
     const day = forecast.daily[i];
     const forecastElement = document.createElement('div');
     forecastElement.classList.add('day');
@@ -135,6 +135,7 @@ function displayForecast(forecast) {
     forecastContainer.appendChild(forecastElement);
   }
 }
+
 
 function getDayName(timestamp) {
   const date = new Date(timestamp * 1000);
