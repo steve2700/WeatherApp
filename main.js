@@ -125,8 +125,4 @@ function dateBuilder(d) {
   return `${day}, ${date} ${month} ${year}`;
 }
 
-function showError(error) {
-  console.log(error);
-  alert('An error occurred. Please try again.');
-}
 
