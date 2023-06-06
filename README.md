@@ -1,2 +1,2 @@
 # WeatherApp
-building a weather app using Apis of weather data.
+building a weather app using Apis of weather da
