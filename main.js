@@ -86,18 +86,34 @@ function displayForecast(forecast) {
   }
 }
 
+// ...
+
 // Get the appropriate weather icon based on weather condition code
 function getWeatherIcon(conditionCode) {
-  // Here, you can map condition codes to specific weather icons from the Weather Icons library
-  // Example mapping:
-  // Thunderstorm: 200-299
-  // Drizzle: 300-399
-  // Rain: 500-599
-  // ...
   // Update this mapping according to your requirements
   // You can find the full list of condition codes at https://openweathermap.org/weather-conditions
-  return 'wi-day-sunny'; // Default to sunny weather icon
+  switch (true) {
+    case conditionCode >= 200 && conditionCode <= 232:
+      return 'wi-thunderstorm';
+    case conditionCode >= 300 && conditionCode <= 321:
+      return 'wi-showers';
+    case conditionCode >= 500 && conditionCode <= 531:
+      return 'wi-rain';
+    case conditionCode >= 600 && conditionCode <= 622:
+      return 'wi-snow';
+    case conditionCode >= 701 && conditionCode <= 781:
+      return 'wi-fog';
+    case conditionCode === 800:
+      return 'wi-day-sunny';
+    case conditionCode >= 801 && conditionCode <= 804:
+      return 'wi-cloudy';
+    default:
+      return 'wi-refresh';
+  }
 }
+
+// ...
+
 
 // Format the date to a desired format (e.g., DD/MM/YYYY)
 function formatDate(date) {
