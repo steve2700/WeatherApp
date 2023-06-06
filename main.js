@@ -160,5 +160,94 @@ function showError(error) {
   console.log(error);
   // Display the error message in the UI as desired
 }
+// Hourly forecast
+fetch(`${api.base}forecast?lat=${latitude}&lon=${longitude}&units=metric&APPID=${api.key}`)
+  .then(forecast => forecast.json())
+  .then(displayForecast)
+  .catch(showError);
+
+// UV index
+const getUVIndex = (weather) => {
+  switch (weather.weather[0].id) {
+    case 200:
+      return "Very high";
+    case 201:
+      return "High";
+    case 202:
+      return "Moderate";
+    case 210:
+      return "Low";
+    default:
+      return "No UV index";
+  }
+};
+
+// Pollen count
+const getPollenCount = (weather) => {
+  return weather.weather[0].description;
+};
+
+// Air quality index
+const getAirQualityIndex = (weather) => {
+  return weather.weather[0].description;
+};
+
+// Travel weather
+const getTravelWeather = (weather) => {
+  return weather.weather[0].description;
+};
+
+// Display the hourly forecast
+function displayForecast(forecast) {
+  let forecastDiv = document.querySelector('.forecast');
+  forecastDiv.innerHTML = '';
+
+  for (let i = 0; i < forecast.list.length; i += 8) {
+    let forecastData = forecast.list[i];
+
+    let forecastItem = document.createElement('div');
+    forecastItem.classList.add('forecast-item');
+
+    let forecastDate = document.createElement('div');
+    forecastDate.classList.add('forecast-date');
+    forecastDate.textContent = formatDate(forecastData.dt_txt);
+    forecastItem.appendChild(forecastDate);
+
+    let forecastIcon = document.createElement('i');
+    forecastIcon.className = `wi ${getWeatherIcon(forecastData.weather[0].id)}`;
+    forecastItem.appendChild(forecastIcon);
+
+    let forecastTemp = document.createElement('div');
+    forecastTemp.classList.add('forecast-temp');
+    forecastTemp.innerHTML = `${Math.round(forecastData.main.temp)}<span>°C</span>`;
+    forecastItem.appendChild(forecastTemp);
+
+    forecastDiv.appendChild(forecastItem);
+  }
+}
+
+// Display the UV index
+function displayUVIndex(weather) {
+  let uvIndex = document.querySelector('.uv-index');
+  uvIndex.textContent = getUVIndex(weather);
+}
+
+// Display the pollen count
+function displayPollenCount(weather) {
+  let pollenCount = document.querySelector('.pollen-count');
+  pollenCount.textContent = getPollenCount(weather);
+}
+
+// Display the air quality index
+function displayAirQualityIndex(weather) {
+  let airQualityIndex = document.querySelector('.air-quality-index');
+  airQualityIndex.textContent = getAirQualityIndex(weather);
+}
+
+// Display the travel weather
+function displayTravelWeather(weather) {
+  let travelWeather = document.querySelector('.travel-weather');
+  travelWeather.textContent = getTravelWeather(weather);
+}
 
 
