@@ -6,42 +6,31 @@ const api = {
 const searchbox = document.querySelector('.search-box');
 searchbox.addEventListener('keypress', setQuery);
 
-// Get weather data based on the search query
 function setQuery(evt) {
   if (evt.keyCode == 13) {
     getResults(searchbox.value);
   }
 }
 
-// Fetch weather data from the OpenWeatherMap API
 function getResults(query) {
   fetch(`${api.base}weather?q=${query}&units=metric&APPID=${api.key}`)
-    .then(weather => {
-      return weather.json();
-    })
+    .then(weather => weather.json())
     .then(displayResults)
-    .catch(() => {
-      showError();
-    });
+    .catch(showError);
 
   fetch(`${api.base}forecast?q=${query}&units=metric&APPID=${api.key}`)
-    .then(forecast => {
-      return forecast.json();
-    })
+    .then(forecast => forecast.json())
     .then(displayForecast)
-    .catch(() => {
-      showError();
-    });
+    .catch(showError);
 }
 
-// Display the current weather data
 function displayResults(weather) {
   let city = document.querySelector('.location .city');
-  city.innerText = `${weather.name}, ${weather.sys.country}`;
+  city.textContent = `${weather.name}, ${weather.sys.country}`;
 
   let now = new Date();
   let date = document.querySelector('.location .date');
-  date.innerText = dateBuilder(now);
+  date.textContent = dateBuilder(now);
 
   let temp = document.querySelector('.current .temp');
   temp.innerHTML = `${Math.round(weather.main.temp)}<span>°C</span>`;
@@ -50,13 +39,12 @@ function displayResults(weather) {
   weatherIcon.className = `wi ${getWeatherIcon(weather.weather[0].id)}`;
 
   let weatherDescription = document.querySelector('.current .weather');
-  weatherDescription.innerText = weather.weather[0].description;
+  weatherDescription.textContent = weather.weather[0].description;
 
   let hilow = document.querySelector('.hi-low');
-  hilow.innerText = `${Math.round(weather.main.temp_min)}°C / ${Math.round(weather.main.temp_max)}°C`;
+  hilow.textContent = `${Math.round(weather.main.temp_min)}°C / ${Math.round(weather.main.temp_max)}°C`;
 }
 
-// Display the forecast for the upcoming days
 function displayForecast(forecast) {
   let forecastDiv = document.querySelector('.forecast');
   forecastDiv.innerHTML = '';
@@ -69,29 +57,29 @@ function displayForecast(forecast) {
 
     let forecastDate = document.createElement('div');
     forecastDate.classList.add('forecast-date');
-    forecastDate.innerText = formatDate(forecastData.dt_txt);
+    forecastDate.textContent = formatDate(forecastData.dt_txt);
+    forecastItem.appendChild(forecastDate);
 
     let forecastIcon = document.createElement('i');
     forecastIcon.className = `wi ${getWeatherIcon(forecastData.weather[0].id)}`;
+    forecastItem.appendChild(forecastIcon);
 
     let forecastTemp = document.createElement('div');
     forecastTemp.classList.add('forecast-temp');
     forecastTemp.innerHTML = `${Math.round(forecastData.main.temp)}<span>°C</span>`;
-
-    forecastItem.appendChild(forecastDate);
-    forecastItem.appendChild(forecastIcon);
     forecastItem.appendChild(forecastTemp);
 
     forecastDiv.appendChild(forecastItem);
   }
 }
 
-// ...
+function formatDate(dateString) {
+  let date = new Date(dateString);
+  let options = { weekday: 'short', month: 'short', day: 'numeric' };
+  return date.toLocaleDateString(undefined, options);
+}
 
-// Get the appropriate weather icon based on weather condition code
 function getWeatherIcon(conditionCode) {
-  // Update this mapping according to your requirements
-  // You can find the full list of condition codes at https://openweathermap.org/weather-conditions
   switch (true) {
     case conditionCode >= 200 && conditionCode <= 232:
       return 'wi-thunderstorm';
@@ -112,63 +100,33 @@ function getWeatherIcon(conditionCode) {
   }
 }
 
-// ...
+function dateBuilder(d) {
+  let months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+        "September",
+    "October",
+    "November",
+    "December"
+  ];
+  let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+  let day = days[d.getDay()];
+  let date = d.getDate();
+  let month = months[d.getMonth()];
+  let year = d.getFullYear();
 
-// Format the date to a desired format (e.g., DD/MM/YYYY)
-function formatDate(date) {
-  let formattedDate = new Date(date);
-  return formattedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `${day}, ${date} ${month} ${year}`;
 }
 
-// Show error message when the API request fails
-function showError() {
-  let city = document.querySelector('.location .city');
-  city.innerText = 'Error fetching data';
-
-  let temp = document.querySelector('.current .temp');
-  temp.innerHTML = '';
-
-  let weatherDescription = document.querySelector('.current .weather');
-  weatherDescription.innerText = '';
-
-  let hilow = document.querySelector('.hi-low');
-  hilow.innerText = '';
+function showError(error) {
+  console.log(error);
+  alert('An error occurred. Please try again.');
 }
 
-// Get the user's geolocation and display the weather for that location
-function getGeolocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-
-      fetch(`${api.base}weather?lat=${latitude}&lon=${longitude}&units=metric&APPID=${api.key}`)
-        .then(weather => {
-          return weather.json();
-        })
-        .then(displayResults)
-        .catch(() => {
-          showError();
-        });
-
-      fetch(`${api.base}forecast?lat=${latitude}&lon=${longitude}&units=metric&APPID=${api.key}`)
-        .then(forecast => {
-          return forecast.json();
-        })
-        .then(displayForecast)
-        .catch(() => {
-          showError();
-        });
-    });
-  } else {
-    showError();
-  }
-}
-
-// Initialize the application
-function init() {
-  getGeolocation();
-}
-
-init();
