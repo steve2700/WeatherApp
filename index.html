@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Weather app</title>
+  <title>Weather App</title>
   <link rel="stylesheet" href="main.css" />
+  <link rel="stylesheet" href="weather-icons.min.css" /> <!-- Weather Icons CSS -->
 </head>
 <body>
   <div class="app-wrap">
@@ -14,16 +15,18 @@
     </header>
     <main>
       <section class="location">
-        <div class="city">Northampton, GB</div>
-        <div class="date">Thursday 10 January 2020</div>
+        <div class="city">Loading...</div>
+        <div class="date"></div>
       </section>
       <div class="current">
-        <div class="temp">15<span>°c</span></div>
-        <div class="weather">Sunny</div>
-        <div class="hi-low">13°c / 16°c</div>
+        <div class="temp">Loading...</div>
+        <div class="weather"><i class="wi wi-refresh"></i></div>
+        <div class="hi-low">Loading...</div>
       </div>
+      <div class="forecast"></div>
     </main>
   </div>
   <script src="main.js"></script>
 </body>
 </html>
+
