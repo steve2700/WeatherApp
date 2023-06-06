@@ -71,14 +71,19 @@ function getUVIndex(latitude, longitude) {
   })
   .then(response => response.json())
   .then(data => {
-    // Handle the UV index data here
-    console.log('UV Index Data:', data);
+    displayUVIndex(data.result.uv_max);
   })
   .catch(error => {
     // Handle any errors
     console.error('Error:', error);
   });
 }
+
+function displayUVIndex(uvIndex) {
+  const uvIndexElement = document.querySelector('.uv-index');
+  uvIndexElement.textContent = `UV Index: ${uvIndex}`;
+}
+
 
 function getPollenCount(lat, lon) {
   // Implement your code to get the pollen count for the given latitude and longitude
@@ -105,6 +110,8 @@ function getForecast(lat, lon) {
       alert('Error retrieving forecast data. Please try again later.');
     });
 }
+
+  
 
 function displayForecast(forecast) {
   const forecastContainer = document.querySelector('.forecast');
